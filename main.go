@@ -152,45 +152,34 @@ func print(w http.ResponseWriter, r *http.Request) {
 		// Top spacing
 		receipt = append(receipt, []byte("\n")...)
 
-		// Header - Branch name
+		// Header - Branch name (Centered, Bold, Large)
 		receipt = append(receipt, escAlignCenter()...)
 		receipt = append(receipt, escBold(true)...)
 		receipt = append(receipt, escDoubleHeight(true)...)
 		receipt = append(receipt, []byte(req.Title+"\n")...)
 		receipt = append(receipt, escDoubleHeight(false)...)
 		receipt = append(receipt, escBold(false)...)
+		receipt = append(receipt, []byte("\n")...)
 
-		// Separator line (32 chars for 57mm paper)
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("================================\n")...)
-
-		// Order ID - Centered and Bold
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, escBold(true)...)
-		receipt = append(receipt, []byte("ORDER: "+req.OrderID+"\n")...)
-		receipt = append(receipt, escBold(false)...)
-
-		// Separator
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("--------------------------------\n")...)
-
-		// Body content - Left aligned
+		// Body content - Left aligned (contains customer info and order details)
 		receipt = append(receipt, escAlignLeft()...)
 		receipt = append(receipt, []byte(req.Body)...)
 
-		// Bottom spacing and thank you message
+		// Dashed separator before thank you message
+		receipt = append(receipt, []byte("--------------------------------\n")...)
+
+		// Thank you message - Centered
 		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("\n================================\n")...)
 		receipt = append(receipt, escBold(true)...)
-		receipt = append(receipt, []byte("Terima kasih\n")...)
+		receipt = append(receipt, []byte("Terimakasih\n")...)
 		receipt = append(receipt, escBold(false)...)
-		receipt = append(receipt, []byte("Atas kepercayaan Anda\n")...)
+		receipt = append(receipt, []byte("Atas Keperyaan Anda\n")...)
 
 		// Bottom spacing before cut
 		receipt = append(receipt, []byte("\n\n")...)
 		receipt = append(receipt, escCut()...)
 	} else if printMode == "qr-only" {
-		// QR-ONLY MODE: Print only QR code labels
+		// QR-ONLY MODE: Print only QR code labels (for staff)
 		// Print all QR codes from the array
 		for i, qrData := range req.QRCodes {
 			if i > 0 {
@@ -198,35 +187,24 @@ func print(w http.ResponseWriter, r *http.Request) {
 				receipt = append(receipt, []byte("\n\n")...)
 			}
 
-			// Header - Service name
+			// Top spacing
+			receipt = append(receipt, []byte("\n")...)
+
+			// Header - Service name (Centered, Bold, Large)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escBold(true)...)
 			receipt = append(receipt, escDoubleHeight(true)...)
 			receipt = append(receipt, []byte(qrData.ServiceName+"\n")...)
 			receipt = append(receipt, escDoubleHeight(false)...)
 			receipt = append(receipt, escBold(false)...)
+			receipt = append(receipt, []byte("\n")...)
 
-			// Separator line
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("================================\n")...)
-
-			// Order ID - Centered and Bold
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, escBold(true)...)
-			receipt = append(receipt, []byte("ORDER: "+qrData.OrderID+"\n")...)
-			receipt = append(receipt, escBold(false)...)
-
-			// Separator
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("--------------------------------\n")...)
-
-			// Body content - Left aligned
+			// Body content - Left aligned (contains customer info and order details)
 			receipt = append(receipt, escAlignLeft()...)
 			receipt = append(receipt, []byte(qrData.Body)...)
 
-			// Separator before QR code
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("\n--------------------------------\n")...)
+			// Dashed separator before QR code
+			receipt = append(receipt, []byte("--------------------------------\n")...)
 
 			// QR CODE - Centered
 			receipt = append(receipt, []byte("\n")...)
@@ -249,32 +227,38 @@ func print(w http.ResponseWriter, r *http.Request) {
 
 		// Backward compatibility: single QR value
 		if len(req.QRCodes) == 0 && req.QRValue != "" {
+			// Top spacing
+			receipt = append(receipt, []byte("\n")...)
+
+			// Header - Title (Centered, Bold, Large)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escBold(true)...)
 			receipt = append(receipt, escDoubleHeight(true)...)
 			receipt = append(receipt, []byte(req.Title+"\n")...)
 			receipt = append(receipt, escDoubleHeight(false)...)
 			receipt = append(receipt, escBold(false)...)
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("================================\n")...)
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, escBold(true)...)
-			receipt = append(receipt, []byte("ORDER: "+req.OrderID+"\n")...)
-			receipt = append(receipt, escBold(false)...)
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("--------------------------------\n")...)
+			receipt = append(receipt, []byte("\n")...)
+
+			// Body content - Left aligned (contains customer info and order details)
 			receipt = append(receipt, escAlignLeft()...)
 			receipt = append(receipt, []byte(req.Body)...)
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("\n--------------------------------\n")...)
+
+			// Dashed separator before QR code
+			receipt = append(receipt, []byte("--------------------------------\n")...)
+
+			// QR CODE - Centered
 			receipt = append(receipt, []byte("\n")...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escQRCode(req.QRValue)...)
+
+			// Text below QR code
 			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escBold(true)...)
 			receipt = append(receipt, []byte("Scan untuk update status\n")...)
 			receipt = append(receipt, escBold(false)...)
+
+			// Bottom spacing before cut
 			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escCut()...)
 		}
@@ -283,39 +267,28 @@ func print(w http.ResponseWriter, r *http.Request) {
 		// 1. Print receipt
 		receipt = append(receipt, []byte("\n")...)
 
-		// Header - Branch name
+		// Header - Branch name (Centered, Bold, Large)
 		receipt = append(receipt, escAlignCenter()...)
 		receipt = append(receipt, escBold(true)...)
 		receipt = append(receipt, escDoubleHeight(true)...)
 		receipt = append(receipt, []byte(req.Title+"\n")...)
 		receipt = append(receipt, escDoubleHeight(false)...)
 		receipt = append(receipt, escBold(false)...)
+		receipt = append(receipt, []byte("\n")...)
 
-		// Separator line
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("================================\n")...)
-
-		// Order ID - Centered and Bold
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, escBold(true)...)
-		receipt = append(receipt, []byte("ORDER: "+req.OrderID+"\n")...)
-		receipt = append(receipt, escBold(false)...)
-
-		// Separator
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("--------------------------------\n")...)
-
-		// Body content - Left aligned
+		// Body content - Left aligned (contains customer info and order details)
 		receipt = append(receipt, escAlignLeft()...)
 		receipt = append(receipt, []byte(req.Body)...)
 
-		// Bottom spacing and thank you message
+		// Dashed separator before thank you message
+		receipt = append(receipt, []byte("--------------------------------\n")...)
+
+		// Thank you message - Centered
 		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("\n================================\n")...)
 		receipt = append(receipt, escBold(true)...)
-		receipt = append(receipt, []byte("Terima kasih\n")...)
+		receipt = append(receipt, []byte("Terimakasih\n")...)
 		receipt = append(receipt, escBold(false)...)
-		receipt = append(receipt, []byte("Atas kepercayaan Anda\n")...)
+		receipt = append(receipt, []byte("Atas Keperyaan Anda\n")...)
 
 		// 2. Print separator barrier
 		receipt = append(receipt, []byte("\n\n")...)
@@ -336,35 +309,21 @@ func print(w http.ResponseWriter, r *http.Request) {
 				receipt = append(receipt, []byte("\n\n")...)
 			}
 
-			// Header - Service name
+			// Header - Service name (Centered, Bold, Large)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escBold(true)...)
 			receipt = append(receipt, escDoubleHeight(true)...)
 			receipt = append(receipt, []byte(qrData.ServiceName+"\n")...)
 			receipt = append(receipt, escDoubleHeight(false)...)
 			receipt = append(receipt, escBold(false)...)
+			receipt = append(receipt, []byte("\n")...)
 
-			// Separator line
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("================================\n")...)
-
-			// Order ID - Centered and Bold
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, escBold(true)...)
-			receipt = append(receipt, []byte("ORDER: "+qrData.OrderID+"\n")...)
-			receipt = append(receipt, escBold(false)...)
-
-			// Separator
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("--------------------------------\n")...)
-
-			// Body content - Left aligned
+			// Body content - Left aligned (contains customer info and order details)
 			receipt = append(receipt, escAlignLeft()...)
 			receipt = append(receipt, []byte(qrData.Body)...)
 
-			// Separator before QR code
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("\n--------------------------------\n")...)
+			// Dashed separator before QR code
+			receipt = append(receipt, []byte("--------------------------------\n")...)
 
 			// QR CODE - Centered
 			receipt = append(receipt, []byte("\n")...)
@@ -387,32 +346,35 @@ func print(w http.ResponseWriter, r *http.Request) {
 
 		// Backward compatibility: single QR value
 		if len(req.QRCodes) == 0 && req.QRValue != "" {
+			// Header - Title (Centered, Bold, Large)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escBold(true)...)
 			receipt = append(receipt, escDoubleHeight(true)...)
 			receipt = append(receipt, []byte(req.Title+"\n")...)
 			receipt = append(receipt, escDoubleHeight(false)...)
 			receipt = append(receipt, escBold(false)...)
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("================================\n")...)
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, escBold(true)...)
-			receipt = append(receipt, []byte("ORDER: "+req.OrderID+"\n")...)
-			receipt = append(receipt, escBold(false)...)
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("--------------------------------\n")...)
+			receipt = append(receipt, []byte("\n")...)
+
+			// Body content - Left aligned (contains customer info and order details)
 			receipt = append(receipt, escAlignLeft()...)
 			receipt = append(receipt, []byte(req.Body)...)
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("\n--------------------------------\n")...)
+
+			// Dashed separator before QR code
+			receipt = append(receipt, []byte("--------------------------------\n")...)
+
+			// QR CODE - Centered
 			receipt = append(receipt, []byte("\n")...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escQRCode(req.QRValue)...)
+
+			// Text below QR code
 			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escBold(true)...)
 			receipt = append(receipt, []byte("Scan untuk update status\n")...)
 			receipt = append(receipt, escBold(false)...)
+
+			// Bottom spacing before cut
 			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escCut()...)
 		}

@@ -229,12 +229,32 @@ func main() {
 		}
 
 		go func() {
+			// Create a sample receipt body following the format from the image
+			sampleBody := "Pelanggan : Bu Kayam\n"
+			sampleBody += "Alamat    : Villa Nusa Indah 2 blok 5. No. 29\n"
+			sampleBody += "Telp      : 0812 934 823\n"
+			sampleBody += "--------------------------------\n"
+			sampleBody += "Nomor     : VLN2 000 000 01\n"
+			sampleBody += "Layanan   : Cuci Setrika\n"
+			sampleBody += "Berat     : 13 kg\n"
+			sampleBody += "Jumlah    :\n"
+			sampleBody += "Hrg satuan: Rp. 8.000\n"
+			sampleBody += "Sub Total : Rp. 104.000\n"
+			sampleBody += "\n"
+			sampleBody += "Metode Pembayaran : Cash\n"
+			sampleBody += "Bayar     : Rp. 105.000\n"
+			sampleBody += "Kembali   : Rp. 1.000\n"
+			sampleBody += "\n"
+			sampleBody += "Masuk     : 12/22/2025, Jam : 16.45\n"
+			sampleBody += "Perkiraan\nselesai   : 12/23/2025, Jam : 16.45\n"
+			sampleBody += "--------------------------------\n"
+
 			// Send test print request
 			testData := PrintRequest{
 				Token:     API_TOKEN,
-				Title:     "Test Print",
+				Title:     "Smart Laundry Test",
 				OrderID:   "TEST-001",
-				Body:      "This is a test print.\nPrinter is working correctly!\n",
+				Body:      sampleBody,
 				PrintMode: "receipt-only",
 			}
 
@@ -243,15 +263,18 @@ func main() {
 			receipt = append(receipt, []byte("\n")...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escBold(true)...)
-			receipt = append(receipt, escDoubleHeight(true)...)
 			receipt = append(receipt, []byte(testData.Title+"\n")...)
-			receipt = append(receipt, escDoubleHeight(false)...)
 			receipt = append(receipt, escBold(false)...)
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("================================\n")...)
-			receipt = append(receipt, escAlignLeft()...)
-			receipt = append(receipt, []byte(testData.Body)...)
 			receipt = append(receipt, []byte("\n")...)
+			receipt = append(receipt, escAlignLeft()...)
+			receipt = append(receipt, escFontSize(false)...) // Use small font
+			receipt = append(receipt, []byte(testData.Body)...)
+			receipt = append(receipt, escFontSize(true)...) // Back to normal font
+			receipt = append(receipt, []byte("\n")...)
+			receipt = append(receipt, escAlignCenter()...)
+			receipt = append(receipt, []byte("Terimakasih\n")...)
+			receipt = append(receipt, []byte("Atas Kepercayaan Anda\n")...)
+			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escCut()...)
 
 			err := writeToCOM(selectedPrinterCOM, receipt)
@@ -407,39 +430,28 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 		// Top spacing
 		receipt = append(receipt, []byte("\n")...)
 
-		// Header - Branch name
+		// Header - Branch name (Centered, Bold)
 		receipt = append(receipt, escAlignCenter()...)
 		receipt = append(receipt, escBold(true)...)
-		receipt = append(receipt, escDoubleHeight(true)...)
 		receipt = append(receipt, []byte(req.Title+"\n")...)
-		receipt = append(receipt, escDoubleHeight(false)...)
 		receipt = append(receipt, escBold(false)...)
 
-		// Separator line (32 chars for 57mm paper)
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("================================\n")...)
+		// Spacing after title
+		receipt = append(receipt, []byte("\n")...)
 
-		// Order ID - Centered and Bold
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, escBold(true)...)
-		receipt = append(receipt, []byte("ORDER: "+req.OrderID+"\n")...)
-		receipt = append(receipt, escBold(false)...)
-
-		// Separator
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("--------------------------------\n")...)
-
-		// Body content - Left aligned
+		// Body content - Left aligned with small font
 		receipt = append(receipt, escAlignLeft()...)
+		receipt = append(receipt, escFontSize(false)...) // Use small font
 		receipt = append(receipt, []byte(req.Body)...)
+		receipt = append(receipt, escFontSize(true)...) // Back to normal font
 
-		// Bottom spacing and thank you message
+		// Bottom spacing
+		receipt = append(receipt, []byte("\n")...)
+
+		// Thank you message - Centered
 		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("\n================================\n")...)
-		receipt = append(receipt, escBold(true)...)
-		receipt = append(receipt, []byte("Terima kasih\n")...)
-		receipt = append(receipt, escBold(false)...)
-		receipt = append(receipt, []byte("Atas kepercayaan Anda\n")...)
+		receipt = append(receipt, []byte("Terimakasih\n")...)
+		receipt = append(receipt, []byte("Atas Kepercayaan Anda\n")...)
 
 		// Bottom spacing before cut
 		receipt = append(receipt, []byte("\n\n")...)
@@ -538,39 +550,28 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 		// 1. Print receipt
 		receipt = append(receipt, []byte("\n")...)
 
-		// Header - Branch name
+		// Header - Branch name (Centered, Bold)
 		receipt = append(receipt, escAlignCenter()...)
 		receipt = append(receipt, escBold(true)...)
-		receipt = append(receipt, escDoubleHeight(true)...)
 		receipt = append(receipt, []byte(req.Title+"\n")...)
-		receipt = append(receipt, escDoubleHeight(false)...)
 		receipt = append(receipt, escBold(false)...)
 
-		// Separator line
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("================================\n")...)
+		// Spacing after title
+		receipt = append(receipt, []byte("\n")...)
 
-		// Order ID - Centered and Bold
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, escBold(true)...)
-		receipt = append(receipt, []byte("ORDER: "+req.OrderID+"\n")...)
-		receipt = append(receipt, escBold(false)...)
-
-		// Separator
-		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("--------------------------------\n")...)
-
-		// Body content - Left aligned
+		// Body content - Left aligned with small font
 		receipt = append(receipt, escAlignLeft()...)
+		receipt = append(receipt, escFontSize(false)...) // Use small font
 		receipt = append(receipt, []byte(req.Body)...)
+		receipt = append(receipt, escFontSize(true)...) // Back to normal font
 
-		// Bottom spacing and thank you message
+		// Bottom spacing
+		receipt = append(receipt, []byte("\n")...)
+
+		// Thank you message - Centered
 		receipt = append(receipt, escAlignCenter()...)
-		receipt = append(receipt, []byte("\n================================\n")...)
-		receipt = append(receipt, escBold(true)...)
-		receipt = append(receipt, []byte("Terima kasih\n")...)
-		receipt = append(receipt, escBold(false)...)
-		receipt = append(receipt, []byte("Atas kepercayaan Anda\n")...)
+		receipt = append(receipt, []byte("Terimakasih\n")...)
+		receipt = append(receipt, []byte("Atas Kepercayaan Anda\n")...)
 
 		// 2. Print separator barrier
 		receipt = append(receipt, []byte("\n\n")...)
