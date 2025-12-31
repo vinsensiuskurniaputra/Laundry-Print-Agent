@@ -433,17 +433,21 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 		// Header - Branch name (Centered, Bold)
 		receipt = append(receipt, escAlignCenter()...)
 		receipt = append(receipt, escBold(true)...)
+		receipt = append(receipt, escDoubleHeight(true)...)
 		receipt = append(receipt, []byte(req.Title+"\n")...)
+		receipt = append(receipt, escDoubleHeight(false)...)
 		receipt = append(receipt, escBold(false)...)
+
+		// Separator under Title
+		receipt = append(receipt, escAlignCenter()...)
+		receipt = append(receipt, []byte("--------------------------------\n")...)
 
 		// Spacing after title
 		receipt = append(receipt, []byte("\n")...)
 
-		// Body content - Left aligned with small font
+		// Body content - Left aligned
 		receipt = append(receipt, escAlignLeft()...)
-		receipt = append(receipt, escFontSize(false)...) // Use small font
 		receipt = append(receipt, []byte(req.Body)...)
-		receipt = append(receipt, escFontSize(true)...) // Back to normal font
 
 		// Bottom spacing
 		receipt = append(receipt, []byte("\n")...)
@@ -545,6 +549,49 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escCut()...)
 		}
+	} else if printMode == "label" {
+		// LABEL MODE: Print detailed label (Branch Name, Details, QR)
+		// Print all QR codes from the array
+		for i, qrData := range req.QRCodes {
+			if i > 0 {
+				// Add spacing between QR codes
+				receipt = append(receipt, []byte("\n\n")...)
+			}
+
+			// 1. Branch Name (Title) - Centered, Bold
+			receipt = append(receipt, escAlignCenter()...)
+			receipt = append(receipt, escBold(true)...)
+			receipt = append(receipt, escDoubleHeight(true)...)
+			receipt = append(receipt, []byte(req.Title+"\n")...)
+			receipt = append(receipt, escDoubleHeight(false)...)
+			receipt = append(receipt, escBold(false)...)
+
+			// 2. Separator under Title
+			receipt = append(receipt, escAlignCenter()...)
+			receipt = append(receipt, []byte("--------------------------------\n")...)
+
+			// 3. Body (Details) - Left aligned
+			receipt = append(receipt, escAlignLeft()...)
+			receipt = append(receipt, []byte(qrData.Body)...)
+
+			// 4. Separator before QR
+			receipt = append(receipt, escAlignCenter()...)
+			receipt = append(receipt, []byte("--------------------------------\n")...)
+
+			// 5. Scan Barcode Text
+			receipt = append(receipt, []byte("\n")...)
+			receipt = append(receipt, escAlignCenter()...)
+			receipt = append(receipt, []byte("Scan Barcode\n")...)
+
+			// 6. QR Code
+			receipt = append(receipt, escQRCode(qrData.QRValue)...)
+
+			// Cut paper only after last QR code
+			if i == len(req.QRCodes)-1 {
+				receipt = append(receipt, []byte("\n\n")...)
+				receipt = append(receipt, escCut()...)
+			}
+		}
 	} else {
 		// ALL MODE: Print receipt, separator, then all QR codes
 		// 1. Print receipt
@@ -556,14 +603,16 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 		receipt = append(receipt, []byte(req.Title+"\n")...)
 		receipt = append(receipt, escBold(false)...)
 
+		// Separator under Title
+		receipt = append(receipt, escAlignCenter()...)
+		receipt = append(receipt, []byte("--------------------------------\n")...)
+
 		// Spacing after title
 		receipt = append(receipt, []byte("\n")...)
 
-		// Body content - Left aligned with small font
+		// Body content - Left aligned
 		receipt = append(receipt, escAlignLeft()...)
-		receipt = append(receipt, escFontSize(false)...) // Use small font
 		receipt = append(receipt, []byte(req.Body)...)
-		receipt = append(receipt, escFontSize(true)...) // Back to normal font
 
 		// Bottom spacing
 		receipt = append(receipt, []byte("\n")...)
@@ -592,47 +641,33 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 				receipt = append(receipt, []byte("\n\n")...)
 			}
 
-			// Header - Service name
+			// 1. Branch Name (Title) - Centered, Bold
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escBold(true)...)
 			receipt = append(receipt, escDoubleHeight(true)...)
-			receipt = append(receipt, []byte(qrData.ServiceName+"\n")...)
+			receipt = append(receipt, []byte(req.Title+"\n")...)
 			receipt = append(receipt, escDoubleHeight(false)...)
 			receipt = append(receipt, escBold(false)...)
 
-			// Separator line
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("================================\n")...)
-
-			// Order ID - Centered and Bold
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, escBold(true)...)
-			receipt = append(receipt, []byte("ORDER: "+qrData.OrderID+"\n")...)
-			receipt = append(receipt, escBold(false)...)
-
-			// Separator
+			// 2. Separator under Title
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, []byte("--------------------------------\n")...)
 
-			// Body content - Left aligned
+			// 3. Body (Details) - Left aligned
 			receipt = append(receipt, escAlignLeft()...)
 			receipt = append(receipt, []byte(qrData.Body)...)
 
-			// Separator before QR code
+			// 4. Separator before QR
 			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, []byte("\n--------------------------------\n")...)
+			receipt = append(receipt, []byte("--------------------------------\n")...)
 
-			// QR CODE - Centered
+			// 5. Scan Barcode Text
 			receipt = append(receipt, []byte("\n")...)
 			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, escQRCode(qrData.QRValue)...)
+			receipt = append(receipt, []byte("Scan Barcode\n")...)
 
-			// Text below QR code
-			receipt = append(receipt, []byte("\n\n")...)
-			receipt = append(receipt, escAlignCenter()...)
-			receipt = append(receipt, escBold(true)...)
-			receipt = append(receipt, []byte("Scan untuk update status\n")...)
-			receipt = append(receipt, escBold(false)...)
+			// 6. QR Code
+			receipt = append(receipt, escQRCode(qrData.QRValue)...)
 
 			// Cut paper only after last QR code
 			if i == len(req.QRCodes)-1 {
