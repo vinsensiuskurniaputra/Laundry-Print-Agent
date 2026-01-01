@@ -230,23 +230,23 @@ func main() {
 
 		go func() {
 			// Create a sample receipt body following the format from the image
-			sampleBody := "Pelanggan : Bu Kayam\n"
-			sampleBody += "Alamat    : Villa Nusa Indah 2 blok 5. No. 29\n"
-			sampleBody += "Telp      : 0812 934 823\n"
+			sampleBody := "Nama       : Bu Kayam\n"
+			sampleBody += "Alamat     : Villa Nusa Indah 2 blok 5. No. 29\n"
+			sampleBody += "Telp       : 0812 934 823\n"
 			sampleBody += "--------------------------------\n"
-			sampleBody += "Nomor     : VLN2 000 000 01\n"
-			sampleBody += "Layanan   : Cuci Setrika\n"
-			sampleBody += "Berat     : 13 kg\n"
-			sampleBody += "Jumlah    :\n"
-			sampleBody += "Hrg satuan: Rp. 8.000\n"
-			sampleBody += "Sub Total : Rp. 104.000\n"
+			sampleBody += "Nomor      : VLN2 000 000 01\n"
+			sampleBody += "Layanan    : Cuci Setrika\n"
+			sampleBody += "Berat      : 13 kg\n"
+			sampleBody += "Jumlah     :\n"
+			sampleBody += "Hrg satuan : Rp. 8.000\n"
+			sampleBody += "Sub Total  : Rp. 104.000\n"
 			sampleBody += "\n"
-			sampleBody += "Metode Pembayaran : Cash\n"
-			sampleBody += "Bayar     : Rp. 105.000\n"
-			sampleBody += "Kembali   : Rp. 1.000\n"
+			sampleBody += "Pembayaran : Cash\n"
+			sampleBody += "Bayar      : Rp. 105.000\n"
+			sampleBody += "Kembali    : Rp. 1.000\n"
 			sampleBody += "\n"
-			sampleBody += "Masuk     : 12/22/2025, Jam : 16.45\n"
-			sampleBody += "Perkiraan\nselesai   : 12/23/2025, Jam : 16.45\n"
+			sampleBody += "Masuk      : 12/22/2025, Jam : 16.45\n"
+			sampleBody += "+- Selesai : 12/23/2025, Jam : 16.45\n"
 			sampleBody += "--------------------------------\n"
 
 			// Send test print request
@@ -274,8 +274,9 @@ func main() {
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, []byte("Terimakasih\n")...)
 			receipt = append(receipt, []byte("Atas Kepercayaan Anda\n")...)
-			receipt = append(receipt, []byte("\n\n")...)
+			receipt = append(receipt, []byte("\n\n\n\n\n\n")...)
 			receipt = append(receipt, escCut()...)
+			receipt = append(receipt, escInit()...)
 
 			err := writeToCOM(selectedPrinterCOM, receipt)
 			if err != nil {
@@ -458,8 +459,9 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 		receipt = append(receipt, []byte("Atas Kepercayaan Anda\n")...)
 
 		// Bottom spacing before cut
-		receipt = append(receipt, []byte("\n\n")...)
+		receipt = append(receipt, []byte("\n\n\n\n\n\n")...)
 		receipt = append(receipt, escCut()...)
+		receipt = append(receipt, escInit()...)
 	} else if printMode == "qr-only" {
 		// QR-ONLY MODE: Print only QR code labels
 		// Print all QR codes from the array
@@ -513,8 +515,9 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 
 			// Bottom spacing before cut (only after last QR code)
 			if i == len(req.QRCodes)-1 {
-				receipt = append(receipt, []byte("\n\n")...)
+				receipt = append(receipt, []byte("\n\n\n\n\n\n")...)
 				receipt = append(receipt, escCut()...)
+				receipt = append(receipt, escInit()...)
 			}
 		}
 
@@ -546,8 +549,9 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 			receipt = append(receipt, escBold(true)...)
 			receipt = append(receipt, []byte("Scan untuk update status\n")...)
 			receipt = append(receipt, escBold(false)...)
-			receipt = append(receipt, []byte("\n\n")...)
+			receipt = append(receipt, []byte("\n\n\n\n\n\n")...)
 			receipt = append(receipt, escCut()...)
+			receipt = append(receipt, escInit()...)
 		}
 	} else if printMode == "label" {
 		// LABEL MODE: Print detailed label (Branch Name, Details, QR)
@@ -588,8 +592,9 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 
 			// Cut paper only after last QR code
 			if i == len(req.QRCodes)-1 {
-				receipt = append(receipt, []byte("\n\n")...)
+				receipt = append(receipt, []byte("\n\n\n\n\n\n")...)
 				receipt = append(receipt, escCut()...)
+				receipt = append(receipt, escInit()...)
 			}
 		}
 	} else {
@@ -671,8 +676,9 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 
 			// Cut paper only after last QR code
 			if i == len(req.QRCodes)-1 {
-				receipt = append(receipt, []byte("\n\n")...)
+				receipt = append(receipt, []byte("\n\n\n\n\n\n")...)
 				receipt = append(receipt, escCut()...)
+				receipt = append(receipt, escInit()...)
 			}
 		}
 
@@ -704,8 +710,9 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 			receipt = append(receipt, escBold(true)...)
 			receipt = append(receipt, []byte("Scan untuk update status\n")...)
 			receipt = append(receipt, escBold(false)...)
-			receipt = append(receipt, []byte("\n\n")...)
+			receipt = append(receipt, []byte("\n\n\n\n\n\n")...)
 			receipt = append(receipt, escCut()...)
+			receipt = append(receipt, escInit()...)
 		}
 	}
 
