@@ -468,7 +468,7 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 		for i, qrData := range req.QRCodes {
 			if i > 0 {
 				// Add spacing between QR codes
-				receipt = append(receipt, []byte("\n\n")...)
+				receipt = append(receipt, []byte("\n\n\n\n")...)
 			}
 
 			// Header - Service name
@@ -502,9 +502,10 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 			receipt = append(receipt, []byte("\n--------------------------------\n")...)
 
 			// QR CODE - Centered
-			receipt = append(receipt, []byte("\n")...)
+			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escQRCode(qrData.QRValue)...)
+			receipt = append(receipt, []byte("\n")...)
 
 			// Text below QR code
 			receipt = append(receipt, []byte("\n\n")...)
@@ -541,9 +542,10 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 			receipt = append(receipt, []byte(req.Body)...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, []byte("\n--------------------------------\n")...)
-			receipt = append(receipt, []byte("\n")...)
+			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escQRCode(req.QRValue)...)
+			receipt = append(receipt, []byte("\n")...)
 			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escBold(true)...)
@@ -559,7 +561,7 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 		for i, qrData := range req.QRCodes {
 			if i > 0 {
 				// Add spacing between QR codes
-				receipt = append(receipt, []byte("\n\n")...)
+				receipt = append(receipt, []byte("\n\n\n\n")...)
 			}
 
 			// 1. Branch Name (Title) - Centered, Bold
@@ -588,7 +590,9 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 			receipt = append(receipt, []byte("Scan Barcode\n")...)
 
 			// 6. QR Code
+			receipt = append(receipt, []byte("\n")...)
 			receipt = append(receipt, escQRCode(qrData.QRValue)...)
+			receipt = append(receipt, []byte("\n")...)
 
 			// Cut paper only after last QR code
 			if i == len(req.QRCodes)-1 {
@@ -643,7 +647,7 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 		for i, qrData := range req.QRCodes {
 			if i > 0 {
 				// Add spacing between QR codes
-				receipt = append(receipt, []byte("\n\n")...)
+				receipt = append(receipt, []byte("\n\n\n\n")...)
 			}
 
 			// 1. Branch Name (Title) - Centered, Bold
@@ -672,7 +676,9 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 			receipt = append(receipt, []byte("Scan Barcode\n")...)
 
 			// 6. QR Code
+			receipt = append(receipt, []byte("\n")...)
 			receipt = append(receipt, escQRCode(qrData.QRValue)...)
+			receipt = append(receipt, []byte("\n")...)
 
 			// Cut paper only after last QR code
 			if i == len(req.QRCodes)-1 {
@@ -702,9 +708,10 @@ func printHandler(w http.ResponseWriter, r *http.Request) {
 			receipt = append(receipt, []byte(req.Body)...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, []byte("\n--------------------------------\n")...)
-			receipt = append(receipt, []byte("\n")...)
+			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escQRCode(req.QRValue)...)
+			receipt = append(receipt, []byte("\n")...)
 			receipt = append(receipt, []byte("\n\n")...)
 			receipt = append(receipt, escAlignCenter()...)
 			receipt = append(receipt, escBold(true)...)
@@ -1019,15 +1026,15 @@ func escQRCode(data string) []byte {
 	// Model 2 (recommended for most printers)
 	cmd = append(cmd, []byte{0x1D, 0x28, 0x6B, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00}...)
 
-	// Size (7) - Optimized for 57mm paper (good balance between size and scannability)
+	// Size (6) - Optimized for 57mm paper (good balance between size and scannability)
 	// Size range: 1-16
-	// For 57mm paper: 6-8 is recommended, 7 is optimal
-	// If QR code is too small, increase to 8. If too large, decrease to 6.
-	cmd = append(cmd, []byte{0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x07}...)
+	// For 57mm paper: 6-8 is recommended, 6 is optimal for higher density and scannability
+	// If QR code is too small, increase to 7 or 8.
+	cmd = append(cmd, []byte{0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x43, 0x06}...)
 
-	// Error correction level (M - Medium) for better reliability
+	// Error correction level (H - High) for maximum reliability
 	// 0x30 = L (Low), 0x31 = M (Medium), 0x32 = Q (Quartile), 0x33 = H (High)
-	cmd = append(cmd, []byte{0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x31}...)
+	cmd = append(cmd, []byte{0x1D, 0x28, 0x6B, 0x03, 0x00, 0x31, 0x45, 0x33}...)
 
 	// Store data
 	dataBytes := []byte(data)
